@@ -1,8 +1,6 @@
 # Diagrama de Clases — Sistema de Reservas (Spring Boot)
 
-![Diagrama de clases](diagrama.jpg)
-
-## Diagrama de clases (Mermaid)
+## Diagrama de clases 
 
 ```mermaid
 classDiagram

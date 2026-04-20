@@ -1,8 +1,7 @@
 package com.tuapp.reservasturismo.controller;
 
 import com.tuapp.reservasturismo.model.Usuario;
-import com.tuapp.reservasturismo.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.tuapp.reservasturismo.service.UsuarioService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,16 +10,34 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
+
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
 
     @GetMapping
     public List<Usuario> listar() {
-        return usuarioRepository.listar();
+        return usuarioService.listarUsuarios();
+    }
+
+    @GetMapping("/{id}")
+    public Usuario buscarPorId(@PathVariable Long id) {
+        return usuarioService.buscarPorId(id);
     }
 
     @PostMapping
     public Usuario crear(@RequestBody Usuario usuario) {
-        return usuarioRepository.guardar(usuario);
+        return usuarioService.crearUsuario(usuario);
+    }
+
+    @PutMapping("/{id}")
+    public Usuario actualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
+        return usuarioService.actualizarUsuario(id, usuario);
+    }
+
+    @DeleteMapping("/{id}")
+    public void eliminar(@PathVariable Long id) {
+        usuarioService.eliminarUsuario(id);
     }
 }

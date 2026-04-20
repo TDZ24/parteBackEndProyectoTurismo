@@ -1,6 +1,70 @@
 # Diagrama de Clases — Sistema de Reservas (Spring Boot)
 
+![Diagrama de clases](diagrama.jpg)
 
+## Diagrama de clases (Mermaid)
+
+```mermaid
+classDiagram
+    direction TB
+
+    class ReservasApplication {
+        <<SpringBootApplication>>
+        +main(args: String[]) void
+    }
+
+    class ReservaController {
+        <<RestController>>
+        -service: ReservaService
+        +listar() Reserva[]
+        +guardar(reserva: Reserva) Reserva
+    }
+
+    class ReservaService {
+        <<Service>>
+        -repository: ReservaRepository
+        +listar() Reserva[]
+        +guardar(reserva: Reserva) Reserva
+    }
+
+    class ReservaRepository {
+        <<interface>>
+        +listar() Reserva[]
+        +guardar(reserva: Reserva) Reserva
+    }
+
+    class ReservaRepositoryImpl {
+        <<Repository>>
+        -reservas: Reserva[]
+        -contador: int
+        +listar() Reserva[]
+        +guardar(reserva: Reserva) Reserva
+    }
+
+    class Reserva {
+        <<Model>>
+        -id: Long
+        -nombre: String
+        -destino: String
+        -fecha: String
+        -personas: int
+        +Reserva()
+        +getId() Long
+        +getNombre() String
+        +getDestino() String
+        +getFecha() String
+        +getPersonas() int
+    }
+
+    ReservasApplication --> ReservaController
+    ReservaController --> ReservaService : Recibe peticiones HTTP y retorna JSON
+    ReservaService --> ReservaRepository : Lógica de negocio
+    ReservaRepositoryImpl ..|> ReservaRepository : Abstracción para repositorios
+    ReservaService ..> Reserva
+    ReservaRepositoryImpl ..> Reserva : Almacenamiento en memoria - arreglo dinámico
+```
+
+---
 
 ## Clases
 

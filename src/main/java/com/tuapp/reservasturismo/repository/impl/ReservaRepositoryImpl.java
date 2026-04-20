@@ -2,6 +2,7 @@ package com.tuapp.reservasturismo.repository.impl;
 
 import com.tuapp.reservasturismo.model.Reserva;
 import com.tuapp.reservasturismo.repository.ReservaRepository;
+import org.springframework.stereotype.Repository; // <-- IMPORTANTE: Faltaba esta línea
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Repository // <-- IMPORTANTE: Esta etiqueta es la que quita el error UnsatisfiedDependencyException
 public class ReservaRepositoryImpl implements ReservaRepository {
 
     private final Map<Long, Reserva> almacenamiento = new HashMap<>();
@@ -16,7 +18,9 @@ public class ReservaRepositoryImpl implements ReservaRepository {
 
     @Override
     public Reserva guardar(Reserva reserva) {
-        reserva.setId(contadorId++);
+        if (reserva.getId() == null) {
+            reserva.setId(contadorId++);
+        }
         almacenamiento.put(reserva.getId(), reserva);
         return reserva;
     }

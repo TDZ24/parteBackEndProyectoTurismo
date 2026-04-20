@@ -2,12 +2,14 @@ package com.tuapp.reservasturismo.repository.impl;
 
 import com.tuapp.reservasturismo.model.Usuario;
 import com.tuapp.reservasturismo.repository.UsuarioRepository;
-
+import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+@Repository
 public class UsuarioRepositoryImpl implements UsuarioRepository {
 
     private final Map<Long, Usuario> almacenamiento = new HashMap<>();
@@ -15,7 +17,9 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
 
     @Override
     public Usuario guardar(Usuario usuario) {
-        usuario.setId(contadorId++);
+        if (usuario.getId() == null) {
+            usuario.setId(contadorId++);
+        }
         almacenamiento.put(usuario.getId(), usuario);
         return usuario;
     }
@@ -46,5 +50,11 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
             throw new RuntimeException("Usuario no encontrado con id: " + id);
         }
         almacenamiento.remove(id);
+    }
+
+    public Optional<Usuario> buscarPorEmail(String email) {
+        return almacenamiento.values().stream()
+                .filter(u -> u.getEmail() != null && u.getEmail().equalsIgnoreCase(email))
+                .findFirst();
     }
 }

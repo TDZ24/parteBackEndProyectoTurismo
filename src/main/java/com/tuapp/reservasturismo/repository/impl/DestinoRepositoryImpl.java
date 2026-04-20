@@ -2,6 +2,7 @@ package com.tuapp.reservasturismo.repository.impl;
 
 import com.tuapp.reservasturismo.model.Destino;
 import com.tuapp.reservasturismo.repository.DestinoRepository;
+import org.springframework.stereotype.Repository; // Importación necesaria
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Repository // Esta etiqueta le dice a Spring que esta es la pieza que buscaba
 public class DestinoRepositoryImpl implements DestinoRepository {
 
     private final Map<Long, Destino> almacenamiento = new HashMap<>();

@@ -1,13 +1,28 @@
 package com.tuapp.reservasturismo.controller;
 
+import com.tuapp.reservasturismo.dto.RolRequestDTO;
 import com.tuapp.reservasturismo.model.Usuario;
 import com.tuapp.reservasturismo.service.UsuarioService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
+/**
+ * CRUD de usuarios + endpoint para cambiar rol.
+ *
+ * GET    /api/usuarios             → listar todos
+ * GET    /api/usuarios/{id}        → buscar por id
+ * POST   /api/usuarios             → crear usuario
+ * PUT    /api/usuarios/{id}        → actualizar usuario
+ * DELETE /api/usuarios/{id}        → eliminar usuario
+ * PUT    /api/usuarios/{id}/rol    → asignar/quitar rol (solo admins)
+ */
 @RestController
 @RequestMapping("/api/usuarios")
+@CrossOrigin(origins = "*")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -22,22 +37,82 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
-    public Usuario buscarPorId(@PathVariable Long id) {
-        return usuarioService.buscarPorId(id);
+    public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(usuarioService.buscarPorId(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping
-    public Usuario crear(@RequestBody Usuario usuario) {
-        return usuarioService.crearUsuario(usuario);
+    public ResponseEntity<?> crear(@RequestBody Usuario usuario) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(usuarioService.crearUsuario(usuario));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
-    public Usuario actualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
-        return usuarioService.actualizarUsuario(id, usuario);
+    public ResponseEntity<?> actualizar(@PathVariable Long id,
+                                        @RequestBody Usuario usuario) {
+        try {
+            return ResponseEntity.ok(usuarioService.actualizarUsuario(id, usuario));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
-        usuarioService.eliminarUsuario(id);
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        try {
+            usuarioService.eliminarUsuario(id);
+            return ResponseEntity.ok(Map.of("mensaje", "Usuario eliminado correctamente."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Asignar o quitar rol de administrador.
+     *
+     * PUT /api/usuarios/{id}/rol
+     * Header: Authorization: Bearer <tokenAdmin>
+     * Body:   { "rol": "ADMIN" }   o   { "rol": "USER" }
+     *
+     * Solo un usuario con rol ADMIN puede ejecutar esta acción.
+     */
+    @PutMapping("/{id}/rol")
+    public ResponseEntity<?> cambiarRol(
+            @PathVariable Long id,
+            @RequestBody RolRequestDTO request,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            String token = extraerToken(authHeader);
+            Usuario actualizado = usuarioService.cambiarRol(id, request.getRol(), token);
+            String accion = "ADMIN".equalsIgnoreCase(actualizado.getRol())
+                    ? "Rol de administrador asignado correctamente."
+                    : "Rol de administrador removido correctamente.";
+            return ResponseEntity.ok(Map.of(
+                    "mensaje", accion,
+                    "usuario", actualizado
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    private String extraerToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Token de sesión no proporcionado.");
+        }
+        return authHeader.substring(7).trim();
     }
 }

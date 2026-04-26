@@ -4,7 +4,7 @@ import com.tuapp.reservasturismo.model.Reserva;
 import java.time.LocalDate;
 
 // Patrón Factory: Centraliza la creación de objetos Reserva
-public class ReservaFactory {
+public class  ReservaFactory {
     public static Reserva crearNuevaReserva(Long usuarioId, Long destinoId, LocalDate inicio, LocalDate fin, int personas) {
         Reserva reserva = new Reserva();
         reserva.setUsuarioId(usuarioId);

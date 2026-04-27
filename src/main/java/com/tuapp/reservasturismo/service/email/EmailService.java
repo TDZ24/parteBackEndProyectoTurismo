@@ -60,7 +60,7 @@ public class EmailService {
 
               <!-- Encabezado -->
               <div style="background-color: #1a73e8; padding: 24px; text-align: center;">
-                <h1 style="color: white; margin: 0; font-size: 22px;">🌍 Explora Mundo</h1>
+                <h1 style="color: white; margin: 0; font-size: 22px;">TurAventura</h1>
                 <p style="color: #d0e8ff; margin: 4px 0 0;">Agencia de Turismo</p>
               </div>
 

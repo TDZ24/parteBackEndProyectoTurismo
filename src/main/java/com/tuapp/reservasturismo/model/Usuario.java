@@ -1,6 +1,7 @@
 package com.tuapp.reservasturismo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Usuario {
 
@@ -41,14 +42,17 @@ public class Usuario {
     public String getRol()       { return rol; }
     public String getAvatarUrl() { return avatarUrl; }
 
-    // @JsonIgnore hace que Jackson nunca incluya este campo en ninguna respuesta JSON
+    // Solo se oculta en las RESPUESTAS, pero sí se lee cuando llega en el JSON
     @JsonIgnore
     public String getPassword()  { return password; }
 
-    public void setId(Long id)               { this.id = id; }
-    public void setNombre(String nombre)     { this.nombre = nombre; }
-    public void setPassword(String password) { this.password = password; }
+    public void setId(Long id)                 { this.id = id; }
+    public void setNombre(String nombre)       { this.nombre = nombre; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+
+    // @JsonProperty permite que Jackson sí lea este campo al deserializar
+    @JsonProperty
+    public void setPassword(String password)   { this.password = password; }
 
     public void setEmail(String email) {
         this.email = email;

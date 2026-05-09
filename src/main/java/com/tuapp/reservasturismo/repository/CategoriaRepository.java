@@ -1,26 +1,12 @@
 package com.tuapp.reservasturismo.repository;
 
 import com.tuapp.reservasturismo.model.Categoria;
-import java.util.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.Optional;
 
-public class CategoriaRepository {
-
-    private List<Categoria> categorias = new ArrayList<>();
-
-    public CategoriaRepository() {
-        categorias.add(new Categoria(1L, "Aventura"));
-        categorias.add(new Categoria(2L, "Playa"));
-        categorias.add(new Categoria(3L, "Cultural"));
-    }
-
-    public List<Categoria> listar() {
-        return categorias;
-    }
-
-    public Categoria buscarPorId(Long id) {
-        return categorias.stream()
-                .filter(c -> c.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
+@Repository
+public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
+    Optional<Categoria> findByNombre(String nombre);
+    boolean existsByNombre(String nombre);
 }

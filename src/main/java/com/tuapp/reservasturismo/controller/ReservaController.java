@@ -2,19 +2,18 @@ package com.tuapp.reservasturismo.controller;
 
 import com.tuapp.reservasturismo.model.Reserva;
 import com.tuapp.reservasturismo.service.ReservaService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/reservas")
+@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class ReservaController {
 
     private final ReservaService reservaService;
-
-    public ReservaController(ReservaService reservaService) {
-        this.reservaService = reservaService;
-    }
 
     @GetMapping
     public List<Reserva> listar() {
@@ -46,9 +45,9 @@ public class ReservaController {
         return reservaService.filtrarPorUsuario(usuarioId);
     }
 
-    @GetMapping("/filtrar/destino/{destinoId}")
-    public List<Reserva> filtrarPorDestino(@PathVariable Long destinoId) {
-        return reservaService.filtrarPorDestino(destinoId);
+    @GetMapping("/filtrar/producto/{productoId}")
+    public List<Reserva> filtrarPorProducto(@PathVariable Long productoId) {
+        return reservaService.filtrarPorDestino(productoId);
     }
 
     @GetMapping("/filtrar/estado/{estado}")

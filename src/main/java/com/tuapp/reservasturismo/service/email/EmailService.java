@@ -1,3 +1,4 @@
+/*
 package com.tuapp.reservasturismo.service.email;
 
 import com.tuapp.reservasturismo.model.Destino;
@@ -28,6 +29,7 @@ public class EmailService {
     /**
      * Envía el correo de confirmación al usuario cuando crea una reserva.
      */
+/*
     public void enviarConfirmacionReserva(Usuario usuario, Reserva reserva, Destino destino) {
         try {
             MimeMessage mensaje = mailSender.createMimeMessage();
@@ -49,6 +51,7 @@ public class EmailService {
     /**
      * Construye el HTML del correo de confirmación.
      */
+/*
     private String construirCuerpoCorreo(Usuario usuario, Reserva reserva, Destino destino) {
         String nombreDestino  = destino != null ? destino.getNombre()   : "Destino #" + reserva.getDestinoId();
         String ubicacion      = destino != null ? destino.getUbicacion() : "-";
@@ -132,3 +135,4 @@ public class EmailService {
         );
     }
 }
+*/

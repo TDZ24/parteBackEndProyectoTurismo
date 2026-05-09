@@ -10,16 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * CRUD de usuarios + endpoint para cambiar rol.
- *
- * GET    /api/usuarios             → listar todos
- * GET    /api/usuarios/{id}        → buscar por id
- * POST   /api/usuarios             → crear usuario
- * PUT    /api/usuarios/{id}        → actualizar usuario
- * DELETE /api/usuarios/{id}        → eliminar usuario
- * PUT    /api/usuarios/{id}/rol    → asignar/quitar rol (solo admins)
- */
 @RestController
 @RequestMapping("/api/usuarios")
 @CrossOrigin(origins = "*")
@@ -79,15 +69,6 @@ public class UsuarioController {
         }
     }
 
-    /**
-     * Asignar o quitar rol de administrador.
-     *
-     * PUT /api/usuarios/{id}/rol
-     * Header: Authorization: Bearer <tokenAdmin>
-     * Body:   { "rol": "ADMIN" }   o   { "rol": "USER" }
-     *
-     * Solo un usuario con rol ADMIN puede ejecutar esta acción.
-     */
     @PutMapping("/{id}/rol")
     public ResponseEntity<?> cambiarRol(
             @PathVariable Long id,
@@ -96,7 +77,7 @@ public class UsuarioController {
         try {
             String token = extraerToken(authHeader);
             Usuario actualizado = usuarioService.cambiarRol(id, request.getRol(), token);
-            String accion = "ADMIN".equalsIgnoreCase(actualizado.getRol())
+            String accion = "ADMIN".equalsIgnoreCase(actualizado.getRol().name())
                     ? "Rol de administrador asignado correctamente."
                     : "Rol de administrador removido correctamente.";
             return ResponseEntity.ok(Map.of(

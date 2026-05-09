@@ -1,22 +1,14 @@
 package com.tuapp.reservasturismo.repository;
 
 import com.tuapp.reservasturismo.model.Usuario;
-import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
-public interface UsuarioRepository {
-
-    Usuario guardar(Usuario usuario);
-
-    List<Usuario> listar();
-
-    Usuario buscarPorId(Long id);
-
-    Optional<Usuario> buscarPorEmail(String email);
-
-    Usuario actualizar(Long id, Usuario usuario);
-
-    Usuario cambiarRol(Long id, String nuevoRol);
-
-    void eliminar(Long id);
+@Repository
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+    Optional<Usuario> findByEmail(String email);
+    Optional<Usuario> findByUsername(String username);
+    boolean existsByEmail(String email);
+    boolean existsByUsername(String username);
 }

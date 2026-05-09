@@ -38,7 +38,7 @@ public class SesionManager {
     /** Verifica si el token pertenece a un admin. */
     public boolean esAdmin(String token) {
         Usuario u = obtenerUsuario(token);
-        return u != null && u.esAdmin();
+        return u != null && u.getRol() == Usuario.Rol.ADMIN;
     }
 
     /** Actualiza el usuario en la sesión activa (por si cambió el rol). */

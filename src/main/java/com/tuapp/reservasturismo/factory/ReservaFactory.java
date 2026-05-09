@@ -1,18 +1,16 @@
 package com.tuapp.reservasturismo.factory;
 
 import com.tuapp.reservasturismo.model.Reserva;
-import java.time.LocalDate;
+import com.tuapp.reservasturismo.model.Usuario;
+import com.tuapp.reservasturismo.model.Producto;
 
-// Patrón Factory: Centraliza la creación de objetos Reserva
-public class  ReservaFactory {
-    public static Reserva crearNuevaReserva(Long usuarioId, Long destinoId, LocalDate inicio, LocalDate fin, int personas) {
+public class ReservaFactory {
+
+    public static Reserva crear(Usuario usuario, Producto producto) {
         Reserva reserva = new Reserva();
-        reserva.setUsuarioId(usuarioId);
-        reserva.setDestinoId(destinoId);
-        reserva.setFechaInicio(inicio);
-        reserva.setFechaFin(fin);
-        reserva.setCantidadPersonas(personas);
-        reserva.setEstado("ACTIVA"); // Estado inicial por defecto
+        reserva.setUsuario(usuario);
+        reserva.setProducto(producto);
+        reserva.setEstado(Reserva.EstadoReserva.ACTIVA);
         return reserva;
     }
 }

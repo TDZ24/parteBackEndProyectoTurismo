@@ -1,116 +1,85 @@
 package com.tuapp.reservasturismo.service.impl;
 
-import com.tuapp.reservasturismo.model.Destino;
+import com.tuapp.reservasturismo.model.Producto;
 import com.tuapp.reservasturismo.model.Reserva;
 import com.tuapp.reservasturismo.model.Usuario;
-import com.tuapp.reservasturismo.repository.DestinoRepository;
+import com.tuapp.reservasturismo.repository.ProductoRepository;
 import com.tuapp.reservasturismo.repository.ReservaRepository;
 import com.tuapp.reservasturismo.repository.UsuarioRepository;
 import com.tuapp.reservasturismo.service.ReservaService;
-import com.tuapp.reservasturismo.service.email.EmailService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ReservaServiceImpl implements ReservaService {
 
-    private final ReservaRepository   reservaRepository;
-    private final UsuarioRepository   usuarioRepository;
-    private final DestinoRepository   destinoRepository;
-    private final EmailService        emailService;
-
-    public ReservaServiceImpl(ReservaRepository reservaRepository,
-                              UsuarioRepository usuarioRepository,
-                              DestinoRepository destinoRepository,
-                              EmailService emailService) {
-        this.reservaRepository = reservaRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.destinoRepository = destinoRepository;
-        this.emailService      = emailService;
-    }
+    private final ReservaRepository reservaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ProductoRepository productoRepository;
 
     @Override
     public Reserva crearReserva(Reserva reserva) {
-        // ── Validaciones ──────────────────────────────────────────────────────
-        if (reserva.getFechaInicio() == null || reserva.getFechaFin() == null) {
-            throw new RuntimeException("Las fechas no pueden estar vacías.");
-        }
-        if (reserva.getFechaFin().isBefore(reserva.getFechaInicio())) {
-            throw new RuntimeException("La fecha fin no puede ser antes que la fecha inicio.");
-        }
-        if (reserva.getCantidadPersonas() <= 0) {
-            throw new RuntimeException("La cantidad de personas debe ser mayor a 0.");
-        }
-        if (reserva.getUsuarioId() == null) {
-            throw new RuntimeException("Debe indicar el usuario que hace la reserva.");
-        }
-        if (reserva.getDestinoId() == null) {
-            throw new RuntimeException("Debe indicar el destino de la reserva.");
-        }
+        Usuario usuario = usuarioRepository.findById(reserva.getUsuario().getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // ── Guardar ───────────────────────────────────────────────────────────
-        reserva.setEstado("ACTIVA");
-        Reserva guardada = reservaRepository.guardar(reserva);
+        Producto producto = productoRepository.findById(reserva.getProducto().getId())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        // ── Enviar correo de confirmación ────────────────────────────────────
-        Usuario usuario = usuarioRepository.buscarPorId(guardada.getUsuarioId());
-        Destino destino = destinoRepository.buscarPorId(guardada.getDestinoId());
+        reserva.setUsuario(usuario);
+        reserva.setProducto(producto);
+        reserva.setEstado(Reserva.EstadoReserva.ACTIVA);
 
-        if (usuario != null && usuario.getEmail() != null) {
-            emailService.enviarConfirmacionReserva(usuario, guardada, destino);
-        }
-
-        return guardada;
+        return reservaRepository.save(reserva);
     }
 
     @Override
     public List<Reserva> listarReservas() {
-        return reservaRepository.listar();
+        return reservaRepository.findAll();
     }
 
     @Override
     public Reserva buscarPorId(Long id) {
-        Reserva reserva = reservaRepository.buscarPorId(id);
-        if (reserva == null) {
-            throw new RuntimeException("Reserva no encontrada con id: " + id);
-        }
-        return reserva;
+        return reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada con id: " + id));
     }
 
     @Override
     public Reserva actualizarReserva(Long id, Reserva reserva) {
-        if (reserva.getFechaFin().isBefore(reserva.getFechaInicio())) {
-            throw new RuntimeException("La fecha fin no puede ser antes que la fecha inicio.");
-        }
-        return reservaRepository.actualizar(id, reserva);
+        Reserva existente = buscarPorId(id);
+        existente.setEstado(reserva.getEstado());
+        return reservaRepository.save(existente);
     }
 
     @Override
     public List<Reserva> filtrarPorUsuario(Long usuarioId) {
-        return reservaRepository.filtrarPorUsuario(usuarioId);
+        return reservaRepository.findByUsuarioId(usuarioId);
     }
 
     @Override
-    public List<Reserva> filtrarPorDestino(Long destinoId) {
-        return reservaRepository.filtrarPorDestino(destinoId);
+    public List<Reserva> filtrarPorDestino(Long productoId) {
+        return reservaRepository.findByProductoId(productoId);
     }
 
     @Override
     public List<Reserva> filtrarPorEstado(String estado) {
-        return reservaRepository.filtrarPorEstado(estado);
+        return reservaRepository.findByEstado(Reserva.EstadoReserva.valueOf(estado));
     }
 
     @Override
     public void cambiarEstado(Long id, String estado) {
-        if (!estado.equals("ACTIVA") && !estado.equals("CANCELADA")) {
-            throw new RuntimeException("Estado inválido. Use ACTIVA o CANCELADA.");
-        }
-        reservaRepository.cambiarEstado(id, estado);
+        Reserva reserva = buscarPorId(id);
+        reserva.setEstado(Reserva.EstadoReserva.valueOf(estado));
+        reservaRepository.save(reserva);
     }
 
     @Override
     public void eliminarReserva(Long id) {
-        reservaRepository.eliminar(id);
+        if (!reservaRepository.existsById(id)) {
+            throw new RuntimeException("Reserva no encontrada con id: " + id);
+        }
+        reservaRepository.deleteById(id);
     }
 }

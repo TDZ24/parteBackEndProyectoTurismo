@@ -1,25 +1,13 @@
 package com.tuapp.reservasturismo.repository;
 
 import com.tuapp.reservasturismo.model.Reserva;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import java.util.List;
 
-public interface ReservaRepository {
-
-    Reserva guardar(Reserva reserva);
-
-    List<Reserva> listar();
-
-    Reserva buscarPorId(Long id);
-
-    Reserva actualizar(Long id, Reserva reserva);
-
-    List<Reserva> filtrarPorUsuario(Long usuarioId);
-
-    List<Reserva> filtrarPorDestino(Long destinoId);
-
-    List<Reserva> filtrarPorEstado(String estado);
-
-    void cambiarEstado(Long id, String estado);
-
-    void eliminar(Long id);
+@Repository
+public interface ReservaRepository extends JpaRepository<Reserva, Long> {
+    List<Reserva> findByUsuarioId(Long usuarioId);
+    List<Reserva> findByProductoId(Long productoId);
+    List<Reserva> findByEstado(Reserva.EstadoReserva estado);
 }

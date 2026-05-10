@@ -1,5 +1,3 @@
-// Archivo: src/main/java/com/tuapp/reservasturismo/dto/ReservaResponseDTO.java
-
 package com.tuapp.reservasturismo.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,10 +8,10 @@ public class ReservaResponseDTO {
     private Long id;
 
     @JsonProperty("usuario")
-    private UsuarioMinDTO usuario;
+    private UsuarioResumen usuario;
 
     @JsonProperty("producto")
-    private ProductoMinDTO producto;
+    private ProductoResumen producto;
 
     @JsonProperty("cantidad_personas")
     private Integer cantidadPersonas;
@@ -24,10 +22,9 @@ public class ReservaResponseDTO {
     @JsonProperty("fecha_creacion")
     private LocalDateTime fecha;
 
-    // Constructor
     public ReservaResponseDTO() {}
 
-    public ReservaResponseDTO(Long id, UsuarioMinDTO usuario, ProductoMinDTO producto,
+    public ReservaResponseDTO(Long id, UsuarioResumen usuario, ProductoResumen producto,
                               Integer cantidadPersonas, String estado, LocalDateTime fecha) {
         this.id = id;
         this.usuario = usuario;
@@ -37,93 +34,58 @@ public class ReservaResponseDTO {
         this.fecha = fecha;
     }
 
-    // Getters y Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public UsuarioMinDTO getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(UsuarioMinDTO usuario) {
-        this.usuario = usuario;
-    }
-
-    public ProductoMinDTO getProducto() {
-        return producto;
-    }
-
-    public void setProducto(ProductoMinDTO producto) {
-        this.producto = producto;
-    }
-
-    public Integer getCantidadPersonas() {
-        return cantidadPersonas;
-    }
-
-    public void setCantidadPersonas(Integer cantidadPersonas) {
-        this.cantidadPersonas = cantidadPersonas;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public LocalDateTime getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDateTime fecha) {
-        this.fecha = fecha;
-    }
-}
-
-// DTOs Anidados
-class UsuarioMinDTO {
-    private Long id;
-    private String username;
-    private String email;
-
-    public UsuarioMinDTO() {}
-    public UsuarioMinDTO(Long id, String username, String email) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-    }
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-}
+    public UsuarioResumen getUsuario() { return usuario; }
+    public void setUsuario(UsuarioResumen usuario) { this.usuario = usuario; }
+    public ProductoResumen getProducto() { return producto; }
+    public void setProducto(ProductoResumen producto) { this.producto = producto; }
+    public Integer getCantidadPersonas() { return cantidadPersonas; }
+    public void setCantidadPersonas(Integer cantidadPersonas) { this.cantidadPersonas = cantidadPersonas; }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
+    public LocalDateTime getFecha() { return fecha; }
+    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 
-class ProductoMinDTO {
-    private Long id;
-    private String nombre;
-    private String descripcion;
+    // ── Clases internas ──────────────────────────────────────────────────────
 
-    public ProductoMinDTO() {}
-    public ProductoMinDTO(Long id, String nombre, String descripcion) {
-        this.id = id;
-        this.nombre = nombre;
-        this.descripcion = descripcion;
+    public static class UsuarioResumen {
+        private Long id;
+        private String username;
+        private String email;
+
+        public UsuarioResumen() {}
+        public UsuarioResumen(Long id, String username, String email) {
+            this.id = id;
+            this.username = username;
+            this.email = email;
+        }
+
+        public Long getId() { return id; }
+        public void setId(Long id) { this.id = id; }
+        public String getUsername() { return username; }
+        public void setUsername(String username) { this.username = username; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public static class ProductoResumen {
+        private Long id;
+        private String nombre;
+        private String descripcion;
+
+        public ProductoResumen() {}
+        public ProductoResumen(Long id, String nombre, String descripcion) {
+            this.id = id;
+            this.nombre = nombre;
+            this.descripcion = descripcion;
+        }
+
+        public Long getId() { return id; }
+        public void setId(Long id) { this.id = id; }
+        public String getNombre() { return nombre; }
+        public void setNombre(String nombre) { this.nombre = nombre; }
+        public String getDescripcion() { return descripcion; }
+        public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    }
 }

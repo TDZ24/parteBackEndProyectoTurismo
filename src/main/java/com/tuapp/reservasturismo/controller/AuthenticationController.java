@@ -52,7 +52,7 @@ public class AuthenticationController {
         }
 
         // FIX: pasar el rol del usuario al generar el token
-        String token = jwtService.generarToken(usuario.getUsername(), usuario.getRol());
+        String token = jwtService.generarToken(usuario.getUsername(), usuario.getRol().name());
 
         return new AuthResponseDTO(token);
     }

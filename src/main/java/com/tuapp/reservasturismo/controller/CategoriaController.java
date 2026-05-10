@@ -1,38 +1,23 @@
 package com.tuapp.reservasturismo.controller;
-
-import com.tuapp.reservasturismo.model.Categoria;
-import com.tuapp.reservasturismo.repository.CategoriaRepository;
-import lombok.RequiredArgsConstructor;
+import com.tuapp.reservasturismo.dto.CategoriaRequestDTO;
+import com.tuapp.reservasturismo.dto.CategoriaResponseDTO;
+import com.tuapp.reservasturismo.service.CategoriaService;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-
 @RestController
-@RequestMapping("/api/categorias")
-@CrossOrigin(origins = "*")
-@RequiredArgsConstructor
+@RequestMapping("/categorias")
 public class CategoriaController {
+    private final CategoriaService categoriaService;
+    public CategoriaController(CategoriaService categoriaService) {
+        this.categoriaService = categoriaService;
 
-    private final CategoriaRepository categoriaRepository;
-
-    @GetMapping
-    public List<Categoria> listar() {
-        return categoriaRepository.findAll();
     }
-
-    @GetMapping("/{id}")
-    public Categoria buscarPorId(@PathVariable Long id) {
-        return categoriaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con id: " + id));
-    }
-
     @PostMapping
-    public Categoria crear(@RequestBody Categoria categoria) {
-        return categoriaRepository.save(categoria);
+    public CategoriaResponseDTO crear(@RequestBody CategoriaRequestDTO dto) {
+        return categoriaService.crear(dto);
     }
-
-    @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
-        categoriaRepository.deleteById(id);
+    @GetMapping
+    public List<CategoriaResponseDTO> listar() {
+        return categoriaService.listar();
     }
 }

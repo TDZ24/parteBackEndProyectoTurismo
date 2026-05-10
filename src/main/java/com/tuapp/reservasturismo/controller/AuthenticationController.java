@@ -6,7 +6,7 @@ import com.tuapp.reservasturismo.dto.UsuarioRequestDTO;
 import com.tuapp.reservasturismo.dto.UsuarioResponseDTO;
 import com.tuapp.reservasturismo.model.Usuario;
 import com.tuapp.reservasturismo.repository.UsuarioRepository;
-import com.tuapp.reservasturismo.Security.JwtService;
+import com.tuapp.reservasturismo.security.JwtService;
 
 import com.tuapp.reservasturismo.service.UsuarioService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

@@ -1,4 +1,4 @@
-package com.tuapp.reservasturismo.Security;
+package com.tuapp.reservasturismo.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

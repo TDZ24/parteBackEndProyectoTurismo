@@ -1,17 +1,11 @@
-package com.tuapp.reservasturismo.model;
-import jakarta.persistence.*;
+package com.tuapp.reservasturismo.dto;
 
-@Entity
-@Table(name = "categorias")
-public class Categoria {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class CategoriaResponseDTO {
     private Long id;
-    @Column(nullable = false, unique = true)
     private String nombre;
-    public Categoria() {
+    public CategoriaResponseDTO() {
     }
-    public Categoria(Long id, String nombre) {
+    public CategoriaResponseDTO(Long id, String nombre) {
         this.id = id;
         this.nombre = nombre;
     }

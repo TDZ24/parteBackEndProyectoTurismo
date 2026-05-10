@@ -17,10 +17,11 @@ public class JwtService {
 
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    public String generarToken(String username) {
-
+    // FIX: incluir el rol en el token para que JwtFilter pueda usarlo
+    public String generarToken(String username, String rol) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("rol", rol) // FIX: añadir rol como claim
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -28,12 +29,15 @@ public class JwtService {
     }
 
     public String extraerUsername(String token) {
-
         return obtenerClaims(token).getSubject();
     }
 
-    public boolean validarToken(String token) {
+    // FIX: nuevo método para extraer el rol del token
+    public String extraerRol(String token) {
+        return obtenerClaims(token).get("rol", String.class);
+    }
 
+    public boolean validarToken(String token) {
         try {
             obtenerClaims(token);
             return true;
@@ -43,7 +47,6 @@ public class JwtService {
     }
 
     private Claims obtenerClaims(String token) {
-
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()

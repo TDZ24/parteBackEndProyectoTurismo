@@ -2,6 +2,7 @@ package com.tuapp.reservasturismo.service.impl;
 
 import com.tuapp.reservasturismo.dto.UsuarioRequestDTO;
 import com.tuapp.reservasturismo.dto.UsuarioResponseDTO;
+import com.tuapp.reservasturismo.exception.UsuarioNoEncontradoException;
 import com.tuapp.reservasturismo.model.Usuario;
 import com.tuapp.reservasturismo.repository.UsuarioRepository;
 import com.tuapp.reservasturismo.service.UsuarioService;
@@ -15,11 +16,11 @@ import java.util.stream.Collectors;
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository repo;
-    private final BCryptPasswordEncoder encoder;
+    private final BCryptPasswordEncoder encoder; // FIX: inyectado como @Bean, no instanciado con new
 
-    public UsuarioServiceImpl(UsuarioRepository repo) {
+    public UsuarioServiceImpl(UsuarioRepository repo, BCryptPasswordEncoder encoder) {
         this.repo = repo;
-        this.encoder = new BCryptPasswordEncoder();
+        this.encoder = encoder;
     }
 
     @Override
@@ -50,7 +51,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UsuarioResponseDTO editar(Long id, UsuarioRequestDTO dto) {
 
         Usuario usuario = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new UsuarioNoEncontradoException(id)); // FIX: excepción custom
+
+        // FIX: validar que el nuevo email no esté en uso por otro usuario
+        repo.findByEmail(dto.getEmail()).ifPresent(existente -> {
+            if (!existente.getId().equals(id)) {
+                throw new RuntimeException("El email ya está en uso por otro usuario");
+            }
+        });
 
         usuario.setUsername(dto.getUsername());
         usuario.setEmail(dto.getEmail());
@@ -67,7 +75,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public void eliminar(Long id) {
         if (!repo.existsById(id)) {
-            throw new RuntimeException("Usuario no existe");
+            throw new UsuarioNoEncontradoException(id); // FIX: excepción custom
         }
         repo.deleteById(id);
     }

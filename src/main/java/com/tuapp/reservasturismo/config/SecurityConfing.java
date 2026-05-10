@@ -4,6 +4,7 @@ import com.tuapp.reservasturismo.security.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -16,19 +17,21 @@ public class SecurityConfing {
         this.jwtFilter = jwtFilter;
     }
 
+    // FIX: definir el encoder como @Bean para que Spring lo inyecte donde se necesite,
+    // evitando múltiples instancias manuales con `new BCryptPasswordEncoder()`
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http) throws Exception {
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers(
-                                "/auth/**"
-                        ).permitAll()
-
+                        .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
 

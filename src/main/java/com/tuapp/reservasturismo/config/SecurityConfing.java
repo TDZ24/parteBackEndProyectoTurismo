@@ -1,6 +1,6 @@
 package com.tuapp.reservasturismo.config;
 
-import com.tuapp.reservasturismo.Security.JwtFilter;
+import com.tuapp.reservasturismo.security.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

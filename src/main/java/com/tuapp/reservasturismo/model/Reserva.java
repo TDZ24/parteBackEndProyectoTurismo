@@ -29,6 +29,7 @@ public class Reserva {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default                                  // ← línea agregada
     private EstadoReserva estado = EstadoReserva.ACTIVA;
 
     @Column(name = "fecha")

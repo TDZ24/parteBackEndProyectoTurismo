@@ -4,10 +4,15 @@ import com.tuapp.reservasturismo.dto.AuthRequestDTO;
 import com.tuapp.reservasturismo.dto.AuthResponseDTO;
 import com.tuapp.reservasturismo.dto.UsuarioRequestDTO;
 import com.tuapp.reservasturismo.dto.UsuarioResponseDTO;
+import com.tuapp.reservasturismo.dto.api.ApiResponse;
+import com.tuapp.reservasturismo.exception.CredencialesInvalidasException;
 import com.tuapp.reservasturismo.model.Usuario;
 import com.tuapp.reservasturismo.repository.UsuarioRepository;
 import com.tuapp.reservasturismo.security.JwtService;
 import com.tuapp.reservasturismo.service.UsuarioService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +23,7 @@ public class AuthenticationController {
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
     private final JwtService jwtService;
-    private final BCryptPasswordEncoder encoder; // FIX: inyectado como @Bean, no instanciado con new
+    private final BCryptPasswordEncoder encoder;
 
     public AuthenticationController(UsuarioService usuarioService,
                                     UsuarioRepository usuarioRepository,
@@ -31,16 +36,18 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public UsuarioResponseDTO register(@RequestBody UsuarioRequestDTO dto) {
-        return usuarioService.crear(dto);
+    public ResponseEntity<ApiResponse<UsuarioResponseDTO>> register(@Valid @RequestBody UsuarioRequestDTO dto) {
+        UsuarioResponseDTO creado = usuarioService.crear(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Usuario registrado correctamente.", creado));
     }
 
     @PostMapping("/login")
-    public AuthResponseDTO login(@RequestBody AuthRequestDTO dto) {
+    public ResponseEntity<ApiResponse<AuthResponseDTO>> login(@Valid @RequestBody AuthRequestDTO dto) {
 
         Usuario usuario = usuarioRepository
                 .findByUsername(dto.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new CredencialesInvalidasException("Usuario no encontrado"));
 
         boolean passwordCorrecta = encoder.matches(
                 dto.getPassword(),
@@ -48,12 +55,11 @@ public class AuthenticationController {
         );
 
         if (!passwordCorrecta) {
-            throw new RuntimeException("Contraseña incorrecta");
+            throw new CredencialesInvalidasException("Contraseña incorrecta");
         }
 
-        // FIX: pasar el rol del usuario al generar el token
         String token = jwtService.generarToken(usuario.getUsername(), usuario.getRol().name());
 
-        return new AuthResponseDTO(token);
+        return ResponseEntity.ok(ApiResponse.success("Login realizado correctamente.", new AuthResponseDTO(token)));
     }
 }

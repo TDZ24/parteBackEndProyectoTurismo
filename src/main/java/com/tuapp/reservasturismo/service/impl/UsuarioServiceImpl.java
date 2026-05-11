@@ -4,6 +4,9 @@ import com.tuapp.reservasturismo.dto.LoginRequestDTO;
 import com.tuapp.reservasturismo.dto.LoginResponseDTO;
 import com.tuapp.reservasturismo.dto.UsuarioRequestDTO;
 import com.tuapp.reservasturismo.dto.UsuarioResponseDTO;
+import com.tuapp.reservasturismo.exception.CredencialesInvalidasException;
+import com.tuapp.reservasturismo.exception.ReservaException;
+import com.tuapp.reservasturismo.exception.UsuarioNoEncontradoException;
 import com.tuapp.reservasturismo.model.Usuario;
 import com.tuapp.reservasturismo.repository.UsuarioRepository;
 import com.tuapp.reservasturismo.service.UsuarioService;
@@ -32,7 +35,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public UsuarioResponseDTO crear(UsuarioRequestDTO dto) {
         if (repo.findByEmail(dto.getEmail()).isPresent()) {
-            throw new RuntimeException("El email ya existe");
+            throw new ReservaException("El email ya existe", "EMAIL_YA_EXISTE");
         }
         Usuario usuario = new Usuario();
         usuario.setUsername(dto.getUsername());
@@ -47,14 +50,15 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Usuario crearUsuario(Usuario usuario) {
         if (repo.existsByEmail(usuario.getEmail())) {
-            throw new RuntimeException("Ya existe un usuario con el email: " + usuario.getEmail());
+            throw new ReservaException("Ya existe un usuario con el email: " + usuario.getEmail(), "EMAIL_YA_EXISTE");
         }
         if (repo.existsByUsername(usuario.getUsername())) {
-            throw new RuntimeException("Ya existe un usuario con el username: " + usuario.getUsername());
+            throw new ReservaException("Ya existe un usuario con el username: " + usuario.getUsername(), "USERNAME_YA_EXISTE");
         }
         if (usuario.getRol() == null) {
             usuario.setRol(Usuario.Rol.USER);
         }
+        usuario.setPassword(encoder.encode(usuario.getPassword()));
         return repo.save(usuario);
     }
 
@@ -66,7 +70,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Usuario buscarPorId(Long id) {
         return repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
+                .orElseThrow(() -> new UsuarioNoEncontradoException(id));
     }
 
     @Override
@@ -83,7 +87,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public void eliminarUsuario(Long id) {
         if (!repo.existsById(id)) {
-            throw new RuntimeException("Usuario no encontrado con id: " + id);
+            throw new UsuarioNoEncontradoException(id);
         }
         repo.deleteById(id);
     }
@@ -91,18 +95,18 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public LoginResponseDTO login(LoginRequestDTO request) {
         if (request.getEmail() == null || request.getEmail().isBlank()) {
-            throw new RuntimeException("El email es obligatorio.");
+            throw new ReservaException("El email es obligatorio.", "EMAIL_OBLIGATORIO");
         }
         if (request.getPassword() == null || request.getPassword().isBlank()) {
-            throw new RuntimeException("La contrasena es obligatoria.");
+            throw new ReservaException("La contraseña es obligatoria.", "PASSWORD_OBLIGATORIO");
         }
         Optional<Usuario> optUsuario = repo.findByEmail(request.getEmail());
         if (optUsuario.isEmpty()) {
-            throw new RuntimeException("No existe ninguna cuenta con ese email.");
+            throw new CredencialesInvalidasException("No existe ninguna cuenta con ese email.");
         }
         Usuario usuario = optUsuario.get();
         if (!encoder.matches(request.getPassword(), usuario.getPassword())) {
-            throw new RuntimeException("Contrasena incorrecta.");
+            throw new CredencialesInvalidasException("Contraseña incorrecta.");
         }
         String token = sesionManager.crearSesion(usuario);
         return new LoginResponseDTO(
@@ -118,10 +122,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public void logout(String token) {
         if (token == null || token.isBlank()) {
-            throw new RuntimeException("Token de sesion no proporcionado.");
+            throw new ReservaException("Token de sesión no proporcionado.", "TOKEN_NO_PROPORCIONADO");
         }
         if (sesionManager.obtenerUsuario(token) == null) {
-            throw new RuntimeException("La sesion no existe o ya fue cerrada.");
+            throw new ReservaException("La sesión no existe o ya fue cerrada.", "TOKEN_INVALIDO");
         }
         sesionManager.cerrarSesion(token);
     }
@@ -129,18 +133,18 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Usuario cambiarRol(Long idObjetivo, String nuevoRol, String tokenAdmin) {
         if (tokenAdmin == null || tokenAdmin.isBlank()) {
-            throw new RuntimeException("Se requiere token de sesion para esta accion.");
+            throw new ReservaException("Se requiere token de sesión para esta acción.", "TOKEN_NO_PROPORCIONADO");
         }
         if (!sesionManager.esAdmin(tokenAdmin)) {
-            throw new RuntimeException("Acceso denegado. Solo los administradores pueden cambiar roles.");
+            throw new ReservaException("Acceso denegado. Solo los administradores pueden cambiar roles.", "ACCESO_DENEGADO");
         }
         Usuario objetivo = buscarPorId(idObjetivo);
         if (nuevoRol == null || (!nuevoRol.equalsIgnoreCase("ADMIN") && !nuevoRol.equalsIgnoreCase("USER"))) {
-            throw new RuntimeException("Rol invalido. Los valores permitidos son: ADMIN, USER.");
+            throw new ReservaException("Rol inválido. Los valores permitidos son: ADMIN, USER.", "ROL_INVALIDO");
         }
         Usuario adminActual = sesionManager.obtenerUsuario(tokenAdmin);
         if (adminActual.getId().equals(idObjetivo) && "USER".equalsIgnoreCase(nuevoRol)) {
-            throw new RuntimeException("No puedes quitarte el rol de administrador a ti mismo.");
+            throw new ReservaException("No puedes quitarte el rol de administrador a ti mismo.", "OPERACION_NO_PERMITIDA");
         }
         objetivo.setRol(Usuario.Rol.valueOf(nuevoRol.toUpperCase()));
         return repo.save(objetivo);

@@ -1,8 +1,15 @@
 package com.tuapp.reservasturismo.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
 public class RolRequestDTO {
-    private String rol;           // "ADMIN" o "USER"
-    private String tokenAdmin;    // token del admin que realiza la acción
+
+    @NotBlank(message = "El rol es obligatorio")
+    @Pattern(regexp = "ADMIN|USER|admin|user", message = "Rol inválido. Los valores permitidos son: ADMIN, USER")
+    private String rol;
+
+    private String tokenAdmin;
 
     public RolRequestDTO() {}
 

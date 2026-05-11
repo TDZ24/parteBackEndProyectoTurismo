@@ -1,18 +1,18 @@
 package com.tuapp.reservasturismo.controller;
 
 import com.tuapp.reservasturismo.dto.RolRequestDTO;
+import com.tuapp.reservasturismo.dto.api.ApiResponse;
 import com.tuapp.reservasturismo.model.Usuario;
 import com.tuapp.reservasturismo.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = "*")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -22,72 +22,46 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public List<Usuario> listar() {
-        return usuarioService.listarUsuarios();
+    public ResponseEntity<ApiResponse<List<Usuario>>> listar() {
+        return ResponseEntity.ok(ApiResponse.success("Usuarios obtenidos correctamente.", usuarioService.listarUsuarios()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(usuarioService.buscarPorId(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Usuario>> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Usuario obtenido correctamente.", usuarioService.buscarPorId(id)));
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@RequestBody Usuario usuario) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(usuarioService.crearUsuario(usuario));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Usuario>> crear(@Valid @RequestBody Usuario usuario) {
+        Usuario creado = usuarioService.crearUsuario(usuario);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Usuario creado correctamente.", creado));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Long id,
-                                        @RequestBody Usuario usuario) {
-        try {
-            return ResponseEntity.ok(usuarioService.actualizarUsuario(id, usuario));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Usuario>> actualizar(@PathVariable Long id,
+                                                          @Valid @RequestBody Usuario usuario) {
+        Usuario actualizado = usuarioService.actualizarUsuario(id, usuario);
+        return ResponseEntity.ok(ApiResponse.success("Usuario actualizado correctamente.", actualizado));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Long id) {
-        try {
-            usuarioService.eliminarUsuario(id);
-            return ResponseEntity.ok(Map.of("mensaje", "Usuario eliminado correctamente."));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
+        usuarioService.eliminarUsuario(id);
+        return ResponseEntity.ok(ApiResponse.success("Usuario eliminado correctamente."));
     }
 
     @PutMapping("/{id}/rol")
-    public ResponseEntity<?> cambiarRol(
+    public ResponseEntity<ApiResponse<Usuario>> cambiarRol(
             @PathVariable Long id,
-            @RequestBody RolRequestDTO request,
+            @Valid @RequestBody RolRequestDTO request,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        try {
-            String token = extraerToken(authHeader);
-            Usuario actualizado = usuarioService.cambiarRol(id, request.getRol(), token);
-            String accion = "ADMIN".equalsIgnoreCase(actualizado.getRol().name())
-                    ? "Rol de administrador asignado correctamente."
-                    : "Rol de administrador removido correctamente.";
-            return ResponseEntity.ok(Map.of(
-                    "mensaje", accion,
-                    "usuario", actualizado
-            ));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
-        }
+        String token = extraerToken(authHeader);
+        Usuario actualizado = usuarioService.cambiarRol(id, request.getRol(), token);
+        String accion = "ADMIN".equalsIgnoreCase(actualizado.getRol().name())
+                ? "Rol de administrador asignado correctamente."
+                : "Rol de administrador removido correctamente.";
+        return ResponseEntity.ok(ApiResponse.success(accion, actualizado));
     }
 
     private String extraerToken(String authHeader) {

@@ -2,6 +2,7 @@ package com.tuapp.reservasturismo.controller;
 
 import com.tuapp.reservasturismo.dto.ReservaRequestDTO;
 import com.tuapp.reservasturismo.dto.ReservaResponseDTO;
+import com.tuapp.reservasturismo.dto.api.ApiResponse;
 import com.tuapp.reservasturismo.service.ReservaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,61 +15,62 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/reservas")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class ReservaController {
 
     private final ReservaService reservaService;
 
-    // ── POST /api/reservas → crear reserva ───────────────────────────────────
     @PostMapping
-    public ResponseEntity<ReservaResponseDTO> crear(@Valid @RequestBody ReservaRequestDTO dto) {
+    public ResponseEntity<ApiResponse<ReservaResponseDTO>> crear(@Valid @RequestBody ReservaRequestDTO dto) {
         ReservaResponseDTO creada = reservaService.crearReserva(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(creada);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Reserva creada correctamente.", creada));
     }
 
-    // ── GET /api/reservas → listar todas (solo ADMIN) ─────────────────────────
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<ReservaResponseDTO>> listar() {
-        return ResponseEntity.ok(reservaService.listarReservas());
+    public ResponseEntity<ApiResponse<List<ReservaResponseDTO>>> listar() {
+        return ResponseEntity.ok(ApiResponse.success("Reservas obtenidas correctamente.", reservaService.listarReservas()));
     }
 
-    // ── GET /api/reservas/{id} → buscar por id ────────────────────────────────
     @GetMapping("/{id}")
-    public ResponseEntity<ReservaResponseDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(reservaService.buscarPorId(id));
+    public ResponseEntity<ApiResponse<ReservaResponseDTO>> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Reserva obtenida correctamente.", reservaService.buscarPorId(id)));
     }
 
-    // ── PATCH /api/reservas/{id}/cancelar → cancelar reserva ─────────────────
     @PatchMapping("/{id}/cancelar")
-    public ResponseEntity<ReservaResponseDTO> cancelar(@PathVariable Long id) {
-        return ResponseEntity.ok(reservaService.cancelarReserva(id));
+    public ResponseEntity<ApiResponse<ReservaResponseDTO>> cancelar(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Reserva cancelada correctamente.", reservaService.cancelarReserva(id)));
     }
 
-    // ── DELETE /api/reservas/{id} → eliminar reserva (solo ADMIN) ─────────────
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
         reservaService.eliminarReserva(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Reserva eliminada correctamente."));
     }
 
-    // ── GET /api/reservas/filtrar/usuario/{usuarioId} ─────────────────────────
     @GetMapping("/filtrar/usuario/{usuarioId}")
-    public ResponseEntity<List<ReservaResponseDTO>> filtrarPorUsuario(@PathVariable Long usuarioId) {
-        return ResponseEntity.ok(reservaService.filtrarPorUsuario(usuarioId));
+    public ResponseEntity<ApiResponse<List<ReservaResponseDTO>>> filtrarPorUsuario(@PathVariable Long usuarioId) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Reservas filtradas por usuario correctamente.",
+                reservaService.filtrarPorUsuario(usuarioId)
+        ));
     }
 
-    // ── GET /api/reservas/filtrar/producto/{productoId} ───────────────────────
     @GetMapping("/filtrar/producto/{productoId}")
-    public ResponseEntity<List<ReservaResponseDTO>> filtrarPorProducto(@PathVariable Long productoId) {
-        return ResponseEntity.ok(reservaService.filtrarPorProducto(productoId));
+    public ResponseEntity<ApiResponse<List<ReservaResponseDTO>>> filtrarPorProducto(@PathVariable Long productoId) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Reservas filtradas por producto correctamente.",
+                reservaService.filtrarPorProducto(productoId)
+        ));
     }
 
-    // ── GET /api/reservas/filtrar/estado/{estado} ─────────────────────────────
     @GetMapping("/filtrar/estado/{estado}")
-    public ResponseEntity<List<ReservaResponseDTO>> filtrarPorEstado(@PathVariable String estado) {
-        return ResponseEntity.ok(reservaService.filtrarPorEstado(estado));
+    public ResponseEntity<ApiResponse<List<ReservaResponseDTO>>> filtrarPorEstado(@PathVariable String estado) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Reservas filtradas por estado correctamente.",
+                reservaService.filtrarPorEstado(estado)
+        ));
     }
 }

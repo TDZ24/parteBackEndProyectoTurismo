@@ -1,23 +1,52 @@
 package com.tuapp.reservasturismo.controller;
-import com.tuapp.reservasturismo.dto.CategoriaRequestDTO;
-import com.tuapp.reservasturismo.dto.CategoriaResponseDTO;
-import com.tuapp.reservasturismo.service.CategoriaService;
+
+import com.tuapp.reservasturismo.model.Categoria;
+import com.tuapp.reservasturismo.repository.CategoriaRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/categorias")
+@CrossOrigin(origins = "*")
 public class CategoriaController {
-    private final CategoriaService categoriaService;
-    public CategoriaController(CategoriaService categoriaService) {
-        this.categoriaService = categoriaService;
 
+    private final CategoriaRepository repo;
+
+    public CategoriaController(CategoriaRepository repo) {
+        this.repo = repo;
     }
-    @PostMapping
-    public CategoriaResponseDTO crear(@RequestBody CategoriaRequestDTO dto) {
-        return categoriaService.crear(dto);
-    }
+
     @GetMapping
-    public List<CategoriaResponseDTO> listar() {
-        return categoriaService.listar();
+    public List<Categoria> listar() {
+        return repo.findAll();
+    }
+
+    @PostMapping
+    public ResponseEntity<?> crear(@RequestBody Map<String, String> body) {
+        String nombre = body.get("nombre");
+        if (nombre == null || nombre.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "El nombre es obligatorio"));
+        }
+        if (repo.existsByNombre(nombre)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", "Ya existe una categoria con ese nombre"));
+        }
+        Categoria nueva = new Categoria();
+        nueva.setNombre(nombre);
+        return ResponseEntity.status(HttpStatus.CREATED).body(repo.save(nueva));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        if (!repo.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Categoria no encontrada"));
+        }
+        repo.deleteById(id);
+        return ResponseEntity.ok(Map.of("mensaje", "Categoria eliminada"));
     }
 }

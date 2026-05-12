@@ -1,8 +1,9 @@
 package com.tuapp.reservasturismo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-        import lombok.*;
-        import java.time.LocalDateTime;
+import lombok.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -24,6 +25,7 @@ public class Usuario {
     private String email;
 
     @Column(nullable = false, length = 255)
+    @JsonIgnore  // nunca exponer el password en la API
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -34,6 +36,7 @@ public class Usuario {
     private LocalDateTime creadoEn;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore  // evita referencia circular Usuario → Reserva → Usuario
     private List<Reserva> reservas;
 
     @PrePersist

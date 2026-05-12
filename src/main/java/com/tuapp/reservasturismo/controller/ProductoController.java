@@ -34,4 +34,5 @@ public class ProductoController {
                                                                  categoriaId) {
         return productoService.filtrarPorCategoria(categoriaId);
     }
+
 }

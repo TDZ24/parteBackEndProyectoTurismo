@@ -20,30 +20,44 @@ public class ProductoServiceImpl implements ProductoService {
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
 
-    public ProductoServiceImpl(ProductoRepository productoRepository,
-                               CategoriaRepository categoriaRepository) {
+    public ProductoServiceImpl(
+            ProductoRepository productoRepository,
+            CategoriaRepository categoriaRepository
+    ) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
     }
 
     @Override
     public ProductoResponseDTO crear(ProductoRequestDTO dto) {
-        Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
-                .orElseThrow(() -> new ReservaException( // FIX: excepción custom con código
-                        "Categoría no encontrada con ID: " + dto.getCategoriaId(),
-                        "CATEGORIA_NO_ENCONTRADA"));
+
+        Categoria categoria = categoriaRepository
+                .findById(dto.getCategoriaId())
+                .orElseThrow(() ->
+                        new ReservaException(
+                                "Categoría no encontrada con ID: "
+                                        + dto.getCategoriaId(),
+                                "CATEGORIA_NO_ENCONTRADA"
+                        )
+                );
 
         Producto producto = new Producto(
                 null,
                 dto.getNombre(),
                 dto.getDescripcion(),
+                dto.getPrecio(),
+                dto.getCaracteristicas(),
                 categoria
         );
-        return convertirDTO(productoRepository.save(producto));
+
+        return convertirDTO(
+                productoRepository.save(producto)
+        );
     }
 
     @Override
     public List<ProductoResponseDTO> listar() {
+
         return productoRepository.findAll()
                 .stream()
                 .map(this::convertirDTO)
@@ -51,47 +65,79 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
-    public ProductoResponseDTO editar(Long id, ProductoRequestDTO dto) {
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> new ProductoNoEncontradoException(id)); // FIX: excepción custom
+    public ProductoResponseDTO editar(
+            Long id,
+            ProductoRequestDTO dto
+    ) {
 
-        Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
-                .orElseThrow(() -> new ReservaException( // FIX: excepción custom con código
-                        "Categoría no encontrada con ID: " + dto.getCategoriaId(),
-                        "CATEGORIA_NO_ENCONTRADA"));
+        Producto producto = productoRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ProductoNoEncontradoException(id)
+                );
+
+        Categoria categoria = categoriaRepository
+                .findById(dto.getCategoriaId())
+                .orElseThrow(() ->
+                        new ReservaException(
+                                "Categoría no encontrada con ID: "
+                                        + dto.getCategoriaId(),
+                                "CATEGORIA_NO_ENCONTRADA"
+                        )
+                );
 
         producto.setNombre(dto.getNombre());
         producto.setDescripcion(dto.getDescripcion());
+        producto.setPrecio(dto.getPrecio());
+        producto.setCaracteristicas(dto.getCaracteristicas());
         producto.setCategoria(categoria);
-        return convertirDTO(productoRepository.save(producto));
+
+        return convertirDTO(
+                productoRepository.save(producto)
+        );
     }
 
     @Override
     public void eliminar(Long id) {
+
         if (!productoRepository.existsById(id)) {
-            throw new ProductoNoEncontradoException(id); // FIX: excepción custom
+            throw new ProductoNoEncontradoException(id);
         }
+
         productoRepository.deleteById(id);
     }
 
     @Override
-    public List<ProductoResponseDTO> filtrarPorCategoria(Long categoriaId) {
+    public List<ProductoResponseDTO> filtrarPorCategoria(
+            Long categoriaId
+    ) {
+
         if (!categoriaRepository.existsById(categoriaId)) {
-            throw new ReservaException( // FIX: validar que la categoría existe antes de filtrar
-                    "Categoría no encontrada con ID: " + categoriaId,
-                    "CATEGORIA_NO_ENCONTRADA");
+
+            throw new ReservaException(
+                    "Categoría no encontrada con ID: "
+                            + categoriaId,
+                    "CATEGORIA_NO_ENCONTRADA"
+            );
         }
-        return productoRepository.findByCategoriaId(categoriaId)
+
+        return productoRepository
+                .findByCategoriaId(categoriaId)
                 .stream()
                 .map(this::convertirDTO)
                 .collect(Collectors.toList());
     }
 
-    private ProductoResponseDTO convertirDTO(Producto producto) {
+    private ProductoResponseDTO convertirDTO(
+            Producto producto
+    ) {
+
         return new ProductoResponseDTO(
                 producto.getId(),
                 producto.getNombre(),
                 producto.getDescripcion(),
+                producto.getPrecio(),
+                producto.getCaracteristicas(),
                 producto.getCategoria().getNombre()
         );
     }

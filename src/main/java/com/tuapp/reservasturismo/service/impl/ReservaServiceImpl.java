@@ -11,6 +11,7 @@ import com.tuapp.reservasturismo.repository.ProductoRepository;
 import com.tuapp.reservasturismo.repository.ReservaRepository;
 import com.tuapp.reservasturismo.repository.UsuarioRepository;
 import com.tuapp.reservasturismo.service.ReservaService;
+import com.tuapp.reservasturismo.service.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class ReservaServiceImpl implements ReservaService {
     private final ReservaRepository reservaRepository;
     private final UsuarioRepository usuarioRepository;
     private final ProductoRepository productoRepository;
+    private final EmailService emailService;
 
     // ── Crear reserva ────────────────────────────────────────────────────────
     @Override
@@ -42,6 +44,9 @@ public class ReservaServiceImpl implements ReservaService {
 
         Reserva reserva = ReservaFactory.crear(usuario, producto, dto.getCantidadPersonas());
         Reserva guardada = reservaRepository.save(reserva);
+
+        emailService.enviarConfirmacionReserva(usuario, guardada);
+
         return toDTO(guardada);
     }
 

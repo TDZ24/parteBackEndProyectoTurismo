@@ -1,7 +1,10 @@
 package com.tuapp.reservasturismo.controller;
 
 import com.tuapp.reservasturismo.model.Categoria;
+import com.tuapp.reservasturismo.model.Producto;
+import com.tuapp.reservasturismo.repository.CaracteristicaRepository;
 import com.tuapp.reservasturismo.repository.CategoriaRepository;
+import com.tuapp.reservasturismo.repository.ProductoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +18,15 @@ import java.util.Map;
 public class CategoriaController {
 
     private final CategoriaRepository repo;
+    private final ProductoRepository productoRepo;
+    private final CaracteristicaRepository caracteristicaRepo;
 
-    public CategoriaController(CategoriaRepository repo) {
+    public CategoriaController(CategoriaRepository repo,
+                               ProductoRepository productoRepo,
+                               CaracteristicaRepository caracteristicaRepo) {
         this.repo = repo;
+        this.productoRepo = productoRepo;
+        this.caracteristicaRepo = caracteristicaRepo;
     }
 
     @GetMapping
@@ -46,6 +55,11 @@ public class CategoriaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Categoria no encontrada"));
         }
+        List<Producto> productos = productoRepo.findByCategoriaId(id);
+        for (Producto p : productos) {
+            caracteristicaRepo.deleteByProductoId(p.getId());
+        }
+        productoRepo.deleteByCategoriaId(id);
         repo.deleteById(id);
         return ResponseEntity.ok(Map.of("mensaje", "Categoria eliminada"));
     }

@@ -3,7 +3,12 @@ import com.tuapp.reservasturismo.dto.ProductoRequestDTO;
 import com.tuapp.reservasturismo.dto.ProductoResponseDTO;
 import com.tuapp.reservasturismo.service.ProductoService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import java.util.Map;
 import java.util.List;
+
+
+
 @RestController
 @RequestMapping("/productos")
 public class ProductoController {
@@ -25,9 +30,11 @@ public class ProductoController {
                                       @RequestBody ProductoRequestDTO dto) {
         return productoService.editar(id, dto);
     }
+    // DESPUÉS
     @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
         productoService.eliminar(id);
+        return ResponseEntity.ok(Map.of("mensaje", "Producto eliminado"));
     }
     @GetMapping("/categoria/{categoriaId}")
     public List<ProductoResponseDTO> filtrarPorCategoria(@PathVariable Long

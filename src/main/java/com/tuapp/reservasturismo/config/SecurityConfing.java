@@ -67,9 +67,14 @@ public class SecurityConfing {
                         .requestMatchers(HttpMethod.DELETE, "/api/reservas/**").hasRole("ADMIN")
 
                         // Cualquier autenticado puede ver productos, categorías y gestionar sus reservas
-                        .requestMatchers(HttpMethod.GET, "/productos/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/categorias/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/productos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/categorias/**").permitAll()
                         .requestMatchers("/api/reservas/**").authenticated()
+
+                        // Características
+                        .requestMatchers(HttpMethod.POST,   "/productos/*/caracteristicas").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/productos/*/caracteristicas/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/caracteristicas/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )

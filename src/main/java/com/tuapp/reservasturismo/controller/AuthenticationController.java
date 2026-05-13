@@ -70,7 +70,10 @@ public class AuthenticationController {
                     .body(Map.of("error", "Contraseña incorrecta"));
         }
 
-        String token = jwtService.generarToken(usuario.getUsername(), usuario.getRol().name());
+        String token = jwtService.generarToken(
+                usuario.getEmail(),
+                usuario.getRol().name()
+        );
 
         // Ahora devuelve token + datos del usuario para que el front los guarde
         return ResponseEntity.ok(new AuthResponseDTO(

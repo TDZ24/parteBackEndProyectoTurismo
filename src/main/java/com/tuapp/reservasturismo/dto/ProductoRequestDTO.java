@@ -7,6 +7,7 @@ public class ProductoRequestDTO {
     private Double precio;
     private String caracteristicas;
     private Long categoriaId;
+    private String imagen;
 
     public ProductoRequestDTO() {
     }
@@ -35,6 +36,10 @@ public class ProductoRequestDTO {
         this.nombre = nombre;
     }
 
+    public String getImagen() {
+        return imagen;
+    }
+
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
@@ -49,5 +54,9 @@ public class ProductoRequestDTO {
 
     public void setCategoriaId(Long categoriaId) {
         this.categoriaId = categoriaId;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 }

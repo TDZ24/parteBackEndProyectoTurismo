@@ -6,6 +6,7 @@ import com.tuapp.reservasturismo.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.Map;
@@ -70,21 +71,32 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}/rol")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> cambiarRol(
             @PathVariable Long id,
             @RequestBody RolRequestDTO request,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
+
         try {
             String token = extraerToken(authHeader);
-            Usuario actualizado = usuarioService.cambiarRol(id, request.getRol(), token);
+
+            Usuario actualizado = usuarioService.cambiarRol(
+                    id,
+                    request.getRol(),
+                    token
+            );
+
             String accion = "ADMIN".equalsIgnoreCase(actualizado.getRol().name())
                     ? "Rol de administrador asignado correctamente."
                     : "Rol de administrador removido correctamente.";
+
             return ResponseEntity.ok(Map.of(
                     "mensaje", accion,
                     "usuario", actualizado
             ));
+
         } catch (RuntimeException e) {
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", e.getMessage()));
         }

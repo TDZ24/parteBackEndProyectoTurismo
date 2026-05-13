@@ -128,21 +128,22 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Usuario cambiarRol(Long idObjetivo, String nuevoRol, String tokenAdmin) {
-        if (tokenAdmin == null || tokenAdmin.isBlank()) {
-            throw new RuntimeException("Se requiere token de sesion para esta accion.");
-        }
-        if (!sesionManager.esAdmin(tokenAdmin)) {
-            throw new RuntimeException("Acceso denegado. Solo los administradores pueden cambiar roles.");
-        }
+
         Usuario objetivo = buscarPorId(idObjetivo);
-        if (nuevoRol == null || (!nuevoRol.equalsIgnoreCase("ADMIN") && !nuevoRol.equalsIgnoreCase("USER"))) {
-            throw new RuntimeException("Rol invalido. Los valores permitidos son: ADMIN, USER.");
+
+        if (nuevoRol == null ||
+                (!nuevoRol.equalsIgnoreCase("ADMIN")
+                        && !nuevoRol.equalsIgnoreCase("USER"))) {
+
+            throw new RuntimeException(
+                    "Rol invalido. Los valores permitidos son: ADMIN, USER."
+            );
         }
-        Usuario adminActual = sesionManager.obtenerUsuario(tokenAdmin);
-        if (adminActual.getId().equals(idObjetivo) && "USER".equalsIgnoreCase(nuevoRol)) {
-            throw new RuntimeException("No puedes quitarte el rol de administrador a ti mismo.");
-        }
-        objetivo.setRol(Usuario.Rol.valueOf(nuevoRol.toUpperCase()));
+
+        objetivo.setRol(
+                Usuario.Rol.valueOf(nuevoRol.toUpperCase())
+        );
+
         return repo.save(objetivo);
     }
 
